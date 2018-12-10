@@ -8,6 +8,6 @@
 <title></title>
 </head>
 <body>
-<a href="boardlist.do">글목록보기</a>
+<a href="boardlist.do">글목록보기(게시판)</a>
 </body>
 </html>
