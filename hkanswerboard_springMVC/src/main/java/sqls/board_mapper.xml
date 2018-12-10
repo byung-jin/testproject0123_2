@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+  <mapper namespace="com.hk.ansboard">
+    
+    <select id="getAllContent" resultType="AnsDto">
+      select seq,id,title,content,regdate,refer,step,depth,readcount,delflag
+      from hkanswerboard
+      order by refer, step
+    </select>
+
+    <insert id="insertBoard" parameterType="AnsDto">
+      insert into hkanswerboard values
+      (hkanswerboard_seq.nextval,#{id},#{title},#{content},sysdate,
+      (select nvl(max(refer)+1,0) from hkanswerboard),0,0,0,'N')
+    </insert>
+
+    <select id="getBoard" resultType="AnsDto" parameterType="int">
+      select seq,id,regdate,title,content
+      from hkanswerboard where seq = #{seq}
+    </select>
+
+
+
+    <update id="updateBoard" parameterType="AnsDto">
+      update hkanswerboard
+      set title = #{title}, content = #{content}, regdate = sysdate
+      where seq = #{seq}
+    </update>
+
+
+
+    <update id="delBoard" parameterType="int">
+      update hkanswerboard set delflag='Y' where seq=#{seq}
+    </update>
+
+
+
+    <update id="mulDelBoard" parameterType="map">
+      update hkanswerboard set delflag='Y' where seq in
+      <foreach collection="seqs" item="seq" open="(" close=")" separator=",">
+              #{seq}
+      </foreach> 
+    </update>
+    
+    <update id="readCount" parameterType="int">
+      update hkanswerboard set readcount = readcount+1 where seq=#{seq}
+    </update>
+
+    <update id="replyBoard" parameterType="int">
+      <![CDATA[
+       UPDATE HKANSWERBOARD  
+       SET STEP = STEP+1  
+       WHERE REFER=(SELECT REFER FROM HKANSWERBOARD WHERE SEQ=#{seq}) 
+       AND  
+       STEP >(SELECT STEP FROM HKANSWERBOARD WHERE SEQ=#{seq}) 
+      ]]>
+    </update>
+
+    <insert id="replyInsert" parameterType="AnsDto">
+      INSERT INTO HKANSWERBOARD (SEQ,ID,TITLE,CONTENT,REGDATE, REFER,STEP,DEPTH,READCOUNT,DELFLAG) 
+	  VALUES (HKANSWERBOARD_SEQ.NEXTVAL,#{id},#{title},#{content},SYSDATE,
+					(SELECT REFER FROM HKANSWERBOARD WHERE SEQ = #{seq}),
+					(SELECT STEP FROM HKANSWERBOARD WHERE SEQ =#{seq})+1, 
+					(SELECT DEPTH FROM HKANSWERBOARD WHERE SEQ=#{seq})+1,0,'N')
+    </insert>
+
+	<select id="datailAjax" parameterType="int" resultType="AnsDto">
+		SELECT CONTENT FROM HKANSWERBOARD WHERE SEQ=#{seq}
+	</select>
+	
+  </mapper>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
